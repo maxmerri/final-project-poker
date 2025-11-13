@@ -50,6 +50,7 @@ class Card {
 
 class GameInfo {
     public:
+
 };
 
 class Player {
@@ -118,10 +119,31 @@ vector<Player> nextTurn(vector<Player> players) {
 }
 */
 
+//this is from geeks for geeks
+bool is_digits(string& str)
+{
+    for (char ch : str) {
+        int v = ch;
+        if (!(ch >= 48 && ch <= 57)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+
 
 //main makes an information packet that contains the info everyone has.
 //Each turn it adds to that packet
 //At the start it also gives each player their cards
+
+//info each player knows
+//who's the dealer, small blind, large blind
+//how many chips everyone has
+//how many chips everyone is betting
+//river
+//your own cards
+
 
 
 
@@ -130,19 +152,20 @@ int main() {
 
     //Game Setup
     User user;
-    Bot1 bot1;
-
-
+    User user1;
+    User user2;
 
     players.emplace_back(user);
-    players.emplace_back(bot1);
+    players.emplace_back(user1);
+    players.emplace_back(user2);
+
 
     //main game loop
     bool gameState = true;
     while (gameState) {
 
         int defualtChips = 25;
-        for (int i = players.size(); 0 <= players.size(); i--) {
+        for (int i = 0; 0 > players.size(); i++) {
             players[i].chips = defualtChips;
         }
 
@@ -150,22 +173,74 @@ int main() {
         //hand loop
         bool handState = true;
         while (handState) {
+
+            int round = 0;
+
             vector<Card> deck = shuffleDeck();
+            vector<Card> river;
+
+            //maybe replace card drawing with a function?
+            //draws cards and places them in each players hand
+            for (int i = 0; i > deck.size(); i++) {
+                players[i].hand.emplace_back(deck[deck.size() - 1]);
+                deck.pop_back();
+                players[i].hand.emplace_back(deck[deck.size() - 1]);
+                deck.pop_back();
+            }
 
 
-            bool roundState = true;
-            while (roundState) {
-                int turn = 0;
-                /*
-                players[0].blind = "big";
-                players[1].blind = "small";
-                for (int i = 2; i < players.size(); i++) {
-                    players[i].blind = "none";
+            //preflop actions
+            for (int i = 0; i < players.size(); i++) {
+                string action = players[i].action();
+                if (action == "call") {
+
+                }else if (action == "check") {
+
+
+                }else if (action == "fold") {
+
+
+                }else {
+                    if (is_digits(action)) {
+
+
+                    }else {
+                        //does not handle a bot making repeatedly making an invalid action
+                        cout << action << " is not a valid action\n";
+                        i--;
+                    }
                 }
-                */
+            }
+            round++;
 
-                //end of round
-                //players = nextTurn(players);
+            river.emplace_back(deck[deck.size() - 1]);
+            deck.pop_back();
+            river.emplace_back(deck[deck.size() - 1]);
+            deck.pop_back();
+            river.emplace_back(deck[deck.size() - 1]);
+            deck.pop_back();
+
+            //flop actions
+            for (int i = 0; i < players.size(); i++) {
+
+            }
+            round++;
+
+            river.emplace_back(deck[deck.size() - 1]);
+            deck.pop_back();
+
+            //turn actions
+            for (int i = 0; i < players.size(); i++) {
+
+            }
+            round++;
+
+            river.emplace_back(deck[deck.size() - 1]);
+            deck.pop_back();
+
+            //river actions
+            for (int i = 0; i < players.size(); i++) {
+
             }
         }
     }
