@@ -6,73 +6,85 @@
 using namespace std;
 
 class Card {
-public:
-    int value;
-    int suit;
-    Card(int x, int y) {
-        value = x;
-        suit = y;
-    }
-    //gives you the name of the card
-    string name() {
-        string name;
-        if (value == 1) {
-            name = "Ace";
-        }else if (value > 1 && value < 11) {
-            name = to_string(value);
-        }else if (value == 11) {
-            name = "Jack";
-        }else if (value == 12) {
-            name = "Queen";
-        }else if (value == 13) {
-            name = "King";
+    public:
+        int value;
+        int suit;
+        Card(int x, int y) {
+            value = x;
+            suit = y;
         }
+        //gives you the name of the card
+        string name() {
+            string name;
+            if (value == 1) {
+                name = "Ace";
+            }else if (value > 1 && value < 11) {
+                name = to_string(value);
+            }else if (value == 11) {
+                name = "Jack";
+            }else if (value == 12) {
+                name = "Queen";
+            }else if (value == 13) {
+                name = "King";
+            }
 
-        name += " of ";
+            name += " of ";
 
-        switch (suit) {
-            case 1:
-                name += "Clubs";
-                break;
-            case 2:
-                name += "Diamonds";
-                break;
-            case 3:
-                name += "Hearts";
-                break;
-            case 4:
-                name += "Spades";
-                break;
+            switch (suit) {
+                case 1:
+                    name += "Clubs";
+                    break;
+                case 2:
+                    name += "Diamonds";
+                    break;
+                case 3:
+                    name += "Hearts";
+                    break;
+                case 4:
+                    name += "Spades";
+                    break;
+            }
+            return name;
         }
-        return name;
-    }
+};
+
+class GameInfo {
+    public:
 };
 
 class Player {
-public:
-    vector<Card> hand;
-    int chips;
-    string blind;
-    string action() {
-        return 0;
-    }
+    private:
+        int chips;
+        vector<Card> hand;
+    public:
+        friend int main();
+        int getChips() {
+            return chips;
+        }
+        string action() {
+            return 0;
+        }
+    protected:
+        vector<Card> getHand() {
+            return hand;
+        }
 };
 
 // set up user
 class User : public Player {
-public:
-    //prompt the user decided their actions. Also show their hand
-    string action() {
-        return "a";
-    }
+    public:
+        //prompt the user decided their actions. Also show their hand
+        string action() {
+            return "a";
+        }
 
 };
 
 class Bot1 : public Player {
-public:
-    string action() {
-        return "a";
-    }
+    public:
+        string action() {
+            return "a";
+        }
 };
 
 
@@ -100,13 +112,16 @@ vector<Card> shuffleDeck() {
 
 
 // move each player forward one and move
+/*
 vector<Player> nextTurn(vector<Player> players) {
 
 }
+*/
 
 
-
-
+//main makes an information packet that contains the info everyone has.
+//Each turn it adds to that packet
+//At the start it also gives each player their cards
 
 
 
@@ -125,11 +140,12 @@ int main() {
     //main game loop
     bool gameState = true;
     while (gameState) {
-        //gives players their chips
+
         int defualtChips = 25;
-        for (int i = players.size(); 0 > players.size(); i--) {
+        for (int i = players.size(); 0 <= players.size(); i--) {
             players[i].chips = defualtChips;
         }
+
 
         //hand loop
         bool handState = true;
@@ -140,15 +156,16 @@ int main() {
             bool roundState = true;
             while (roundState) {
                 int turn = 0;
+                /*
                 players[0].blind = "big";
                 players[1].blind = "small";
                 for (int i = 2; i < players.size(); i++) {
                     players[i].blind = "none";
                 }
-
+                */
 
                 //end of round
-                players = nextTurn(players);
+                //players = nextTurn(players);
             }
         }
     }
