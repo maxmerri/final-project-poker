@@ -63,7 +63,7 @@ class Player {
             return chips;
         }
         string action() {
-            return 0;
+            return "test";
         }
     protected:
         vector<Card> getHand() {
@@ -76,7 +76,7 @@ class User : public Player {
     public:
         //prompt the user decided their actions. Also show their hand
         string action() {
-            return "a";
+            return "user";
         }
 
 };
@@ -179,9 +179,10 @@ int main() {
             vector<Card> deck = shuffleDeck();
             vector<Card> river;
 
+
             //maybe replace card drawing with a function?
             //draws cards and places them in each players hand
-            for (int i = 0; i > deck.size(); i++) {
+            for (int i = 0; i < players.size(); i++) {
                 players[i].hand.emplace_back(deck[deck.size() - 1]);
                 deck.pop_back();
                 players[i].hand.emplace_back(deck[deck.size() - 1]);
@@ -189,6 +190,8 @@ int main() {
             }
 
 
+            //need to fix polymorphism. Function overloading not working properly
+            //Maybe it needs to be set up as virtual function? idk
             //preflop actions
             for (int i = 0; i < players.size(); i++) {
                 string action = players[i].action();
