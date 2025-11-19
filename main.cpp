@@ -3,8 +3,39 @@
 #include <vector>
 #include <algorithm>
 #include <random>
+#include <memory>
 using namespace std;
 
+//maybe use this for tracking players
+int playerNumber = 0;
+int getPlayerNumber() {
+    playerNumber++;
+    return playerNumber;
+}
+
+//this is from geeks for geeks. checks if a string is only digits
+bool is_digits(string& str)
+{
+    for (char ch : str) {
+        int v = ch;
+        if (!(ch >= 48 && ch <= 57)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+string makeLowerCase(string s) {
+    for (int i = 0; i<s.length(); i++) { // test to run is i less than the length of name
+        s[i] = tolower(s[i]); // convert letter in name to lower case form
+    }
+    return s;
+
+}
+
+
+
+//defines the cards
 class Card {
     public:
         int value;
@@ -13,6 +44,11 @@ class Card {
             value = x;
             suit = y;
         }
+
+        bool operator<(const Card& other) const {
+            return value < other.value;
+        }
+
         //gives you the name of the card
         string name() {
             string name;
@@ -48,90 +84,15 @@ class Card {
         }
 };
 
-class GameInfo {
+class PlayerActions {
     public:
-
-};
-
-class Player {
-    private:
-        int chips;
-        vector<Card> hand;
-    public:
-        friend int main();
-        int getChips() {
-            return chips;
-        }
-        string action() {
-            return "test";
-        }
-    protected:
-        vector<Card> getHand() {
-            return hand;
+        string action;
+        int player;
+        PlayerActions(string x, int y) {
+            action = x;
+            player = y;
         }
 };
-
-// set up user
-class User : public Player {
-    public:
-        //prompt the user decided their actions. Also show their hand
-        string action() {
-            return "user";
-        }
-
-};
-
-class Bot1 : public Player {
-    public:
-        string action() {
-            return "a";
-        }
-};
-
-
-//shuffle deck
-vector<Card> shuffleDeck() {
-    //makes the deck vector
-    vector<Card> deck;
-
-    //adds the cards
-    for (int i = 1; i < 14; i++) {
-        for (int j = 1; j < 5; j++) {
-            deck.emplace_back(Card(i,j));
-        }
-    }
-
-    //sets up randomization
-    random_device rd;
-    mt19937 g(rd());
-    //shuffles
-    std::shuffle(deck.begin(), deck.end(), g);
-    return deck;
-}
-
-//draw card
-
-
-// move each player forward one and move
-/*
-vector<Player> nextTurn(vector<Player> players) {
-
-}
-*/
-
-//this is from geeks for geeks
-bool is_digits(string& str)
-{
-    for (char ch : str) {
-        int v = ch;
-        if (!(ch >= 48 && ch <= 57)) {
-            return false;
-        }
-    }
-    return true;
-}
-
-
 
 //main makes an information packet that contains the info everyone has.
 //Each turn it adds to that packet
@@ -143,21 +104,173 @@ bool is_digits(string& str)
 //how many chips everyone is betting
 //river
 //your own cards
+//valid actions
+bool isStraight(vector<Card> cards) {
+    //sorts cards in order
+    sort(cards.begin(), cards.end());
+    int numOfCards = 0;
+
+    for (int i = 0; i < cards.size() - 1; i++) {
+        //checks if the next card is one higher
+        if (cards[i].value == cards[i+i].value + 1) {
+            numOfCards++;
+        }else if (cards[i].value == cards[i+i].value) {
+            continue;
+        }else if (cards[i].value == 13 && cards[0].value == 1) {
+            continue;
+        }else {
+            return false;
+        }
+
+    }
+    return true;
+}
 
 
+/*
+int handType(vector<Card> cards) {
+    if (isRoyalFlush(cards)) {
+        return 1;
+    }
+}
+*/
+class GameInfo {
+    private:
+        vector<Card> river;
+        int round;
+        int minbet;
+
+    public:
+        GameInfo(vector<Card> a, int b, int c) {
+            river = a;
+            round = b;
+            minbet = c;
+        }
+        GameInfo() {
+
+        }
+        int getMinBet() {
+            return minbet;
+        }
+        int getRound() {
+            return round;
+        }
+        vector<Card> getRiver() {
+            return river;
+        }
+
+};
+
+//Class that every player, both bots and people, derive from
+class Player {
+    private:
+        //chips and hand are private so that children of players can't change it.
+        //Main can change it since it's a friend class
+        int chips;
+        vector<Card> hand;
+        GameInfo gameinfo;
+        void setChips(int x) {
+            chips = x;
+        }
+        void setGameInfo(GameInfo x) {
+            gameinfo = x;
+        }
+        void addChips(int x) {
+            chips = chips + x;
+        }
+        void setHand(vector<Card> x) {
+            hand = x;
+        }
+        void addHand(Card x) {
+            hand.emplace_back(x);
+        }
+    public:
+        friend int main();
+        int getChips() {
+            return chips;
+        }
+        GameInfo getGameInfo() {
+            return gameinfo;
+        }
+        virtual string action() {
+            return "test";
+        }
+    protected:
+        //I think this can just be public?
+        vector<Card> getHand() {
+            return hand;
+        }
+};
+
+// set up user
+class User : public Player {
+    public:
+        //prompt the user decided their actions. Also show their hand
+        string action() override{
+            while (true) {
+                cout << "your hand is a " << getHand()[0].name() << " and a " << getHand()[1].name() << endl;
+                cout << "You can call, check, raise, or fold. To raise type the number to raise by\n";
+                string input;
+
+                //Input validation
+                while (true){
+                    cin >> input;
+
+                    if (makeLowerCase(input) == "call" or makeLowerCase(input) == "fold") {
+                        break;
+                    }else if (makeLowerCase(input) == "check" ) {
+                        if (getGameInfo().getMinBet() == 0) {
+                            break;
+                        }
+                        cout << "Can't check when min bet is not 0";
+                    }else if (is_digits(input)) {
+                        if (0 < stoi(input) && stoi(input) <= getChips()) {
+                            break;
+                        }
+                        cout << "Invalid raise number";
+                    }else {
+                        cout << "Invalid input";
+                    }
+                }
+                return input;
+            }
+        }
+};
+
+
+
+
+//shuffle deck
+vector<Card> shuffleDeck() {
+    //makes the deck vector
+    vector<Card> deck;
+
+    //adds the cards
+    for (int i = 1; i < 14; i++) {
+        for (int j = 1; j < 5; j++) {
+            deck.emplace_back(i,j);
+        }
+    }
+
+    //sets up randomization
+    random_device rd;
+    mt19937 g(rd());
+    //shuffles
+    std::shuffle(deck.begin(), deck.end(), g);
+    return deck;
+}
 
 
 int main() {
-    vector<Player> players;
+    //I don't fully understand pointers but having this vector set up in this way allows the objects in it to override their parent class
+    vector<unique_ptr<Player>> players;
+    //adds players to the game
+    players.push_back(make_unique<Player>());
+    players.push_back(make_unique<User>());
 
-    //Game Setup
-    User user;
-    User user1;
-    User user2;
+    vector<Card> testHand = {Card(1,1),Card(2,1),Card(3,1),Card(4,1),Card(5,1)};
+    cout << isStraight(testHand) << endl;
 
-    players.emplace_back(user);
-    players.emplace_back(user1);
-    players.emplace_back(user2);
 
 
     //main game loop
@@ -165,42 +278,45 @@ int main() {
     while (gameState) {
 
         int defualtChips = 25;
-        for (int i = 0; 0 > players.size(); i++) {
-            players[i].chips = defualtChips;
+        for (auto & player : players) {
+            player->setChips(defualtChips);
         }
-
 
         //hand loop
         bool handState = true;
         while (handState) {
 
             int round = 0;
+            int minbet = 2;
 
             vector<Card> deck = shuffleDeck();
             vector<Card> river;
+            vector<PlayerActions> handActions;
+
 
 
             //maybe replace card drawing with a function?
             //draws cards and places them in each players hand
-            for (int i = 0; i < players.size(); i++) {
-                players[i].hand.emplace_back(deck[deck.size() - 1]);
+            for (auto & player : players) {
+                player->addHand(deck[deck.size() - 1]);
                 deck.pop_back();
-                players[i].hand.emplace_back(deck[deck.size() - 1]);
+                player->addHand(deck[deck.size() - 1]);
                 deck.pop_back();
             }
 
 
-            //need to fix polymorphism. Function overloading not working properly
-            //Maybe it needs to be set up as virtual function? idk
+            //Need to figure out how to do action validation. Main program should tell players valid actions.
             //preflop actions
-            for (int i = 0; i < players.size(); i++) {
-                string action = players[i].action();
+            for (auto & player : players) {
+                string action = player->action();
                 if (action == "call") {
-
-                }else if (action == "check") {
-
+                    //removes chips from player
+                    player->addChips(-minbet);
+                }else if (action == "check" && minbet == 0) {
+                    continue;
 
                 }else if (action == "fold") {
+
 
 
                 }else {
@@ -210,7 +326,7 @@ int main() {
                     }else {
                         //does not handle a bot making repeatedly making an invalid action
                         cout << action << " is not a valid action\n";
-                        i--;
+
                     }
                 }
             }
@@ -248,5 +364,3 @@ int main() {
         }
     }
 }
-
-
