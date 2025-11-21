@@ -116,9 +116,9 @@ bool isStraight(vector<Card> cards) {
 
     for (int i = 0; i < cards.size() - 1; i++) {
         //checks if the next card is one higher
-        if (cards[i].value == cards[i+i].value + 1) {
+        if (cards[i].value == cards[i+1].value + 1) {
             numOfCards++;
-        }else if (cards[i].value == cards[i+i].value) {
+        }else if (cards[i].value == cards[i+1].value) {
             continue;
         }else if (cards[i].value == 13 && cards[0].value == 1) {
             continue;
@@ -126,6 +126,10 @@ bool isStraight(vector<Card> cards) {
             return false;
         }
 
+    }
+
+    if (numOfCards < 5) {
+        return false;
     }
     return true;
 }
@@ -208,8 +212,7 @@ class Player {
             return "test";
         }
         Player() {
-            playerNum = getPlayerNum()
-
+            playerNum = getPlayerNumber();
         }
     protected:
         //I think this can just be public?
@@ -255,7 +258,20 @@ class User : public Player {
 
 //changes the order of who plays
 vector<unique_ptr<Player>> advancePlayerOrder(vector<unique_ptr<Player>> players) {
+    if (players.size() <= 1) {
+        return players;
+    }
 
+    // Move the last element to a temporary
+    auto lastPlayer = std::move(players.back());
+
+    // Remove the last element
+    players.pop_back();
+
+    // Insert at the beginning
+    players.insert(players.begin(), std::move(lastPlayer));
+
+    return players;
 }
 
 
@@ -278,6 +294,8 @@ vector<Card> shuffleDeck() {
     std::shuffle(deck.begin(), deck.end(), g);
     return deck;
 }
+
+
 
 
 int main() {
@@ -314,6 +332,7 @@ int main() {
             vector<Card> deck = shuffleDeck();
             vector<Card> river;
             vector<PlayerActions> handActions;
+
 
 
 
@@ -383,6 +402,15 @@ int main() {
             for (int i = 0; i < players.size(); i++) {
 
             }
+
+            // Move the last element to a temporary
+            auto lastPlayer = std::move(players.back());
+
+            // Remove the last element
+            players.pop_back();
+
+            // Insert at the beginning
+            players.insert(players.begin(), std::move(lastPlayer));
         }
     }
 }
