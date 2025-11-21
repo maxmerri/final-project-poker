@@ -6,12 +6,6 @@
 #include <memory>
 using namespace std;
 
-//maybe use this for tracking players
-int playerNumber = 0;
-int getPlayerNumber() {
-    playerNumber++;
-    return playerNumber;
-}
 
 //this is from geeks for geeks. checks if a string is only digits
 bool is_digits(string& str)
@@ -25,6 +19,7 @@ bool is_digits(string& str)
     return true;
 }
 
+//makes a string lowercase
 string makeLowerCase(string s) {
     for (int i = 0; i<s.length(); i++) { // test to run is i less than the length of name
         s[i] = tolower(s[i]); // convert letter in name to lower case form
@@ -33,9 +28,16 @@ string makeLowerCase(string s) {
 
 }
 
+int playerNumCounter = 0;
+int getPlayerNumber() {
+    playerNumCounter++;
+    return playerNumCounter;
+}
 
 
-//defines the cards
+//Sets up the card object with value 1-13 with 1 being ace and 13 being king
+//suit 1-4 clove, diamond, heart, spade
+//name() returns the cards name for name print reasons
 class Card {
     public:
         int value;
@@ -84,6 +86,8 @@ class Card {
         }
 };
 
+//Not current really used, will be used as a list of actions for bots to look at to make actions.
+//well none of us will take the time or effort to make a bot that looks at action history but ig this could hypothetically used for that
 class PlayerActions {
     public:
         string action;
@@ -134,6 +138,7 @@ int handType(vector<Card> cards) {
     }
 }
 */
+
 class GameInfo {
     private:
         vector<Card> river;
@@ -167,6 +172,7 @@ class Player {
         //chips and hand are private so that children of players can't change it.
         //Main can change it since it's a friend class
         int chips;
+        int playerNum;
         vector<Card> hand;
         GameInfo gameinfo;
         void setChips(int x) {
@@ -184,16 +190,26 @@ class Player {
         void addHand(Card x) {
             hand.emplace_back(x);
         }
+        void setPlayerNum(int x) {
+            playerNum = x;
+        }
     public:
         friend int main();
         int getChips() {
             return chips;
+        }
+        int getPlayerNum() {
+            return playerNum;
         }
         GameInfo getGameInfo() {
             return gameinfo;
         }
         virtual string action() {
             return "test";
+        }
+        Player() {
+            playerNum = getPlayerNum()
+
         }
     protected:
         //I think this can just be public?
@@ -237,7 +253,10 @@ class User : public Player {
         }
 };
 
+//changes the order of who plays
+vector<unique_ptr<Player>> advancePlayerOrder(vector<unique_ptr<Player>> players) {
 
+}
 
 
 //shuffle deck
@@ -268,8 +287,11 @@ int main() {
     players.push_back(make_unique<Player>());
     players.push_back(make_unique<User>());
 
+
+    //Use this method to test hand methods. Make a vector<card> that should pass and one that shouldn't then look at the outputs.
     vector<Card> testHand = {Card(1,1),Card(2,1),Card(3,1),Card(4,1),Card(5,1)};
     cout << isStraight(testHand) << endl;
+
 
 
 
